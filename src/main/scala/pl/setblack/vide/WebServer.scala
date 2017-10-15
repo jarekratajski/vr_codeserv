@@ -9,7 +9,8 @@ import play.api.libs.json.{JsString, JsValue, Json, Writes}
 
 import scala.io.StdIn
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import pl.setblack.vide.walker.{JavaFile, FileScanner}
+import pl.setblack.vide.Code.{Junction, PosNode}
+import pl.setblack.vide.walker.{FileScanner, JavaFile}
 
 object WebServer {
   def main(args: Array[String]) {
@@ -18,7 +19,7 @@ object WebServer {
 
     val deployer  = new Deployer(allJavas)
 
-    for( a <- 1 until 10000){
+    for( a <- 1 until 1000){
       deployer.update
     }
 
@@ -30,16 +31,19 @@ object WebServer {
     implicit val materializer = ActorMaterializer()
     // needed for the future flatMap/onComplete in the end
     implicit val executionContext = system.dispatcher
+    implicit val junctionWrite:Writes[PosNode] = (o: PosNode) => {
+      o.toJSON
+    }
 
     val route = cors() {
       path("code") {
         get {
-          complete(HttpEntity(ContentTypes.`application/json`,Json.toJson(deployer.getNodes.toList).toString()))
+          complete(HttpEntity(ContentTypes.`application/json`,Json.toJson(deployer.getRootNode.javaNodes).toString()))
         }
       } ~ path ("updated") {
          get {
 
-           complete(HttpEntity(ContentTypes.`application/json`,Json.toJson(deployer.update.toList).toString()))
+           complete(HttpEntity(ContentTypes.`application/json`,Json.toJson(deployer.update.javaNodes).toString()))
          }
       }
     }

@@ -3,10 +3,7 @@ package pl.setblack.vide.walker
 import java.nio.file.{FileSystems, Files, Path, Paths}
 
 import com.github.javaparser.JavaParser
-import pl.setblack.vide.Code.{CodeNode, Package}
-import pl.setblack.vide.Coords
 
-import scala.xml.XML
 import scala.collection.JavaConverters._
 
 class FileScanner {
@@ -121,23 +118,30 @@ class FileScanner {
     }
   }
 
+  private def insertPackageOrClass(javaFile: JavaFile, currentPackage: Seq[String], tail: Seq[String], basePackage:JavaPackage): JavaPackage = {
+    if ( tail.isEmpty) {
+      basePackage.copy( classes = basePackage.classes :+ javaFile)
+    } else {
+      insertJavaFile(javaFile, currentPackage :+ tail.head, tail.tail, basePackage)
+    }
+  }
+
 
   private def insertJavaFile(javaFile: JavaFile, currentPackage: Seq[String], tail: Seq[String], basePackage:JavaPackage): JavaPackage = {
     val existing = basePackage.subpackages.find( _.name == currentPackage )//.getOrElse( new Package(currentPackage, Seq(), Seq(), Coords(0,0,0)))
     val newPackage = existing.map( _ => basePackage.copy( subpackages =
       basePackage.subpackages.map( p => if (p.name == currentPackage) {
-        insertJavaFile(javaFile, currentPackage :+ tail.head, tail.tail, p)
+          insertPackageOrClass(javaFile, currentPackage, tail, p)
       } else {
         p
       })
     )).getOrElse( basePackage.copy(subpackages = basePackage.subpackages :+
-      insertJavaFile(javaFile, currentPackage :+ tail.head, tail.tail, JavaPackage(currentPackage, Nil, Nil))))
-
+      insertPackageOrClass(javaFile, currentPackage, tail,  JavaPackage(currentPackage, Nil, Nil))))
     newPackage
   }
 
   private def insertJavaFile(javaFile: JavaFile, rootPackage: JavaPackage): JavaPackage = {
-    val pack = javaFile.pack.split(".").toSeq
+    val pack = javaFile.pack.split("\\.").toSeq
 
     insertJavaFile( javaFile, Seq(pack.head), pack.tail, rootPackage)
 

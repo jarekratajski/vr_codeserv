@@ -1,10 +1,12 @@
 package pl.setblack.vide
 
-import pl.setblack.vide.walker.JavaFile
+import pl.setblack.vide.walker.{JavaFile, Violation}
 import play.api.libs.json.{JsValue, Json, OWrites, Writes}
 
 object Code {
+  implicit val violationWriter =  Json.writes[Violation]
   implicit val javaWriter =  Json.writes[JavaFile]
+
   //implicit val posNodeWriter =  Json.writes[PosNode]
   implicit val junctionWrite:Writes[Junction] = (o: Junction) => {
     o.toJSON

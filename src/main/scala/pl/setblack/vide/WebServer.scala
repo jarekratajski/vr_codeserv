@@ -19,7 +19,8 @@ object WebServer {
 
     val deployer  = new Deployer(allJavas)
 
-    for( a <- 1 until 1000){
+    for( a <- 1 until 100) {
+      println (a)
       deployer.update
     }
 

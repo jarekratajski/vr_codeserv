@@ -10,14 +10,14 @@ class Deployer(val root: JavaPackage) {
   val rnd = new Random("Radom".hashCode)
   val circleRadius = 100.0
 
-  val antigravForce = 0.000009
+  val antigravForce = 0.00002
 
-  val packageIdealDist = 6.1
+  val packageIdealDist = 8.1
   val packageSpringK = 0.00009
 
 
   @volatile
-  var forceMultiplier = 10.0
+  var forceMultiplier = 20.0
 
   @volatile
   var rootNode = initialDeploy(root)
@@ -40,7 +40,7 @@ class Deployer(val root: JavaPackage) {
   }
 
   private def initialDeploy(rootPackage: JavaPackage) = {
-    val initDist = 20.0
+    val initDist = 6.0
     new NodesPack(changeRoot(mapPackage(initDist, Coords(0, 0, 0), rootPackage, None)))
   }
 
@@ -63,7 +63,7 @@ class Deployer(val root: JavaPackage) {
       junctions)
 
     packageDefinition.copy(
-      subpackages = pack.subpackages.map(mapPackage(dist * 0.8, newCoords, _, Some(packageDefinition))),
+      subpackages = pack.subpackages.map(mapPackage(dist * 0.9, newCoords, _, Some(packageDefinition))),
       classes = pack.classes.map(mapClass(1.0 , newCoords, _, Some(packageDefinition)))
     )
 
@@ -71,7 +71,7 @@ class Deployer(val root: JavaPackage) {
 
   private def mapClass(dist: Double, base: Coords, java: JavaFile, parent: Option[PackageNode]): CodeNode = {
     val newCoords = base.add(randomCoord(dist))
-    val junctions = parent.map(p => List(Junction("parent", 0.25, 2.0, p.id))).getOrElse(Nil)
+    val junctions = parent.map(p => List(Junction("parent", 0.5, 2.0, p.id))).getOrElse(Nil)
     CodeNode(java, newCoords, junctions)
   }
 
@@ -87,7 +87,7 @@ class Deployer(val root: JavaPackage) {
     val diff = src.diff(target.coords)
     val distance = diff.module()
     val antigravityPos = {
-      val force = -1.0 * weight * antigravForce*forceMultiplier / Math.max(distance, 0.00001)
+      val force = -1.0 * weight * antigravForce*forceMultiplier / Math.max(distance, 0.0001)
       val push = diff.mult(force)
       src.add(push)
     }
@@ -144,18 +144,12 @@ class Deployer(val root: JavaPackage) {
 
 
   def update: NodesPack = {
-    val allNodes = rootNode.allNodes
+
     val newRoot = update( rootNode.root, rootNode)
     rootNode = new NodesPack(newRoot)
-    forceMultiplier = Math.max( forceMultiplier*0.999, 1.0)
+    forceMultiplier = Math.max( forceMultiplier*0.99999, 1.0)
     rootNode
-
   }
-
-
-
-
-
 
 }
 

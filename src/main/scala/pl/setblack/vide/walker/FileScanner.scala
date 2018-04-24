@@ -74,6 +74,9 @@ class FileScanner {
       case "TooManyFields" => {
         1
       }
+      case "LawOfDemeter" => {
+        1
+      }
 
       case _ => {
         0

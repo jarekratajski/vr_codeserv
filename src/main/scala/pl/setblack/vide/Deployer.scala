@@ -95,7 +95,7 @@ class Deployer(val root: JavaPackage) {
 
 
 
-    val springed = existingJunction.map( junction => {
+    val hooked = existingJunction.map( junction => {
       val dist  =packageIdealDist*junction.distance
       val force = (distance - dist * dist) * packageSpringK * junction.forcMultiplier *  forceMultiplier
       val push = diff.mult(force)
@@ -104,7 +104,7 @@ class Deployer(val root: JavaPackage) {
 
 
 
-    springed
+    hooked
   }
 
   def update(pack : PackageNode, all : NodesPack): PackageNode = {
